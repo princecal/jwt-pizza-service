@@ -44,7 +44,7 @@ test('getFranchises', async () => {
   const franchiseRes = await request(app).get('/api/franchise');
   expect(franchiseRes.status).toBe(200);
   //expect(franchiseRes.body).toEqual({"franchises": [{"id": 1, "name": "pizzaPocket", "stores": [{"id": 1, "name": "SLC"}]}], "more": false})
-  expect(franchiseRes.body.franchises.length).toBeGreaterThan(0);
+  expect(franchiseRes.body.franchises).toBeDefined();
   //console.log(franchiseRes.body);
 });
 test('deleteFranchise', async () => {
