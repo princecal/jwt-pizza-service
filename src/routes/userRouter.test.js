@@ -77,7 +77,6 @@ test('delete user', async () => {
     .set('Authorization', 'Bearer ' + userToken);
   //console.log(deleteRes);
   expect(deleteRes.status).toBe(200);
-
 });
 
 async function registerUser(service) {
