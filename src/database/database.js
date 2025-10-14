@@ -229,7 +229,7 @@ class DB {
       connection.end();
     }
   }
-  async getUsers(authUser, page = 0, limit = 10, nameFilter = '*') {
+  async getUsers(page = 0, limit = 10, nameFilter = '*') {
     const connection = await this.getConnection();
 
     const offset = page * limit;
@@ -244,11 +244,8 @@ class DB {
       }
 
       for (const user of users) {
-        if (authUser?.isRole(Role.Admin)) {
-
+        user.roles = await this.query(connection, `SELECT role FROM userrole WHERE userId=?`, [user.id]);
         
-          user.role = await this.query(connection, `SELECT role FROM userrole WHERE userId=?`, [user.id]);
-        }
       }
       return [users, more];
     } finally {
@@ -312,11 +309,9 @@ class DB {
     try {
       await this.query(connection, `DELETE from userrole WHERE userId=?`,[userId]);
       await this.query(connection, `DELETE FROM user WHERE id=?`, [userId]);
+      //console.log("reached delete end");
     }
-      catch(error){
-      console.log(error)
-    
-    } finally {
+      finally {
       connection.end();
     }
   }

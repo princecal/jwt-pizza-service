@@ -63,7 +63,7 @@ test('list users', async () => {
       'name': name,
 });
   //console.log(listUsersRes2.body)
-  //console.log(listUsersRes2.body.users[0].role)
+  //console.log(listUsersRes.body.users)
   expect(listUsersRes2.status).toBe(200);
   expect(listUsersRes2.body.users[0].name).toBe(name)
   
@@ -71,7 +71,7 @@ test('list users', async () => {
 
 test('delete user', async () => {
   const [user, userToken] = await registerUser(request(app));
-  console.log(user)
+  //console.log(user)
   const deleteRes = await request(app)
     .delete(`/api/user/${user.id}`)
     .set('Authorization', 'Bearer ' + userToken);
