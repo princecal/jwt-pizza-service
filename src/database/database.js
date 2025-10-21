@@ -247,7 +247,7 @@ class DB {
         if (authUser?.isRole(Role.Admin)) {
 
         
-          user.roles = await this.query(connection, `SELECT role FROM userrole WHERE userId=?`, [user.id]);
+          user.roles = await this.query(connection, `SELECT role FROM userRole WHERE userId=?`, [user.id]);
         }
       }
       return [users, more];
@@ -310,7 +310,7 @@ class DB {
   async deleteUser(userId) {
     const connection = await this.getConnection();
     try {
-      await this.query(connection, `DELETE from userrole WHERE userId=?`,[userId]);
+      await this.query(connection, `DELETE from userRole WHERE userId=?`,[userId]);
       await this.query(connection, `DELETE FROM user WHERE id=?`, [userId]);
     }
       catch(error){
