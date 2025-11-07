@@ -2,8 +2,9 @@ const express = require('express');
 const { asyncHandler } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
 const { authRouter, setAuth } = require('./authRouter.js');
-
+const metrics = require('../metrics');
 const userRouter = express.Router();
+
 
 userRouter.docs = [
   {
@@ -67,6 +68,7 @@ userRouter.put(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    const startTime = new Date().getTime();
     const { name, email, password } = req.body;
     const userId = Number(req.params.userId);
     const user = req.user;
@@ -76,6 +78,7 @@ userRouter.put(
 
     const updatedUser = await DB.updateUser(userId, name, email, password);
     const auth = await setAuth(updatedUser);
+    metrics.addLatency(new Date().getTime() - startTime);
     res.json({ user: updatedUser, token: auth });
   })
 );
@@ -83,8 +86,10 @@ userRouter.get(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    const startTime = new Date().getTime();
     //console.log(req.query)
     const [users, more] = await DB.getUsers(req.user, req.query.page, req.query.limit, req.query.name);
+    metrics.addLatency(new Date().getTime() - startTime);
     res.json({ users, more });
   })
 );
@@ -92,9 +97,11 @@ userRouter.delete(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    const startTime = new Date().getTime();
     const userId = Number(req.params.userId);
-    console.log(userId)
+    //console.log(userId)
     await DB.deleteUser(userId);
+    metrics.addLatency(new Date().getTime() - startTime);
     res.json({ message: 'user deleted' });
   })
 );

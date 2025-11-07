@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
+const metrics = require('../metrics');
+
 
 const authRouter = express.Router();
 
@@ -49,9 +51,14 @@ async function setAuthUser(req, res, next) {
 
 // Authenticate token
 authRouter.authenticateToken = (req, res, next) => {
+  const startTime = new Date().getTime();
   if (!req.user) {
+    metrics.authDenied();
+    metrics.addLatency(new Date().getTime() - startTime);
     return res.status(401).send({ message: 'unauthorized' });
   }
+  metrics.authApproved();
+  metrics.addLatency(new Date().getTime() - startTime);
   next();
 };
 
@@ -59,12 +66,16 @@ authRouter.authenticateToken = (req, res, next) => {
 authRouter.post(
   '/',
   asyncHandler(async (req, res) => {
+    const startTime = new Date().getTime();
+
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'name, email, and password are required' });
     }
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
+    metrics.addUser();
+    metrics.addLatency(new Date().getTime() - startTime);
     res.json({ user: user, token: auth });
   })
 );
@@ -73,9 +84,14 @@ authRouter.post(
 authRouter.put(
   '/',
   asyncHandler(async (req, res) => {
+    const startTime = new Date().getTime();
+
     const { email, password } = req.body;
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
+    //console.log("point 1")
+    metrics.addUser();
+    metrics.addLatency(new Date().getTime() - startTime);
     res.json({ user: user, token: auth });
   })
 );
@@ -85,12 +101,17 @@ authRouter.delete(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    const startTime = new Date().getTime();
+
     await clearAuth(req);
+    metrics.logoutUser();
+    metrics.addLatency(new Date().getTime() - startTime);
     res.json({ message: 'logout successful' });
   })
 );
 
 async function setAuth(user) {
+
   const token = jwt.sign(user, config.jwtSecret);
   await DB.loginUser(user.id, token);
   return token;
