@@ -24,7 +24,7 @@ userRouter.docs = [
     response: { user: { id: 1, name: '常用名字', email: 'a@jwt.com', roles: [{ role: 'admin' }] }, token: 'tttttt' },
   },
   {
-    method: 'GET',
+    method: 'DELETE',
     path: '/api/user/:userId?',
     requiresAuth: true,
     description: 'Removes a user from the database',
@@ -32,7 +32,7 @@ userRouter.docs = [
     response: { message: 'user deleted' },
   },
   {
-    method: 'DELETE',
+    method: 'GET',
     path: '/api/user?page=1&limit=10&name=*',
     requiresAuth: true,
     description: 'Gets a list of users',
